@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from padronelectoral import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',views.loadIndex,name='index'),
 ]

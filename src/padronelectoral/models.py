@@ -7,7 +7,8 @@ class Province(models.Model):
 
 class Canton(models.Model):
     name = models.CharField(max_length=20)
-    idProvince = models.ForeignKey(Province,on_delete=models.CASCADE)
+   # idProvince = models.ForeignKey(Province,on_delete=models.CASCADE)
+
 
 class District(models.Model):
     id = models.SmallIntegerField(primary_key=True)
