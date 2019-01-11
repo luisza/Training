@@ -7,10 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title> {% block title %}Electoral Register Costa Rica{% endblock %} </title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />.
-
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
 {% block css %} {% endblock %}
 </head>
 <body>
+
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-center">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'stats' %}">View stats</a></li>
+        </ul>
+    </div>
+</nav>
+
 
 <div class="container">
 {% block content%}
