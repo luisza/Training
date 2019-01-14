@@ -7,7 +7,7 @@ class Province(models.Model):
 
 class Canton(models.Model):
     name = models.CharField(max_length=20)
-    idProvince = models.ForeignKey(Province,on_delete=models.CASCADE)
+    idProvince = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
 
 
 class District(models.Model):
@@ -21,7 +21,9 @@ class Elector(models.Model):
     codelec = models.ForeignKey(District, on_delete=models.CASCADE)
     gender = models.SmallIntegerField()
     cad_date = models.DateField()
-    junta = models.IntegerField(validators=[MaxValueValidator(999999)])
+    board = models.IntegerField(validators=[MaxValueValidator(999999)])
+    #not sure that this can be "" by default.
+    fullName = models.CharField(max_length=100,default="")
     name = models.CharField(max_length=30)
     lastname1 = models.CharField(max_length=26)
     lastname2 = models.CharField(max_length=26)
