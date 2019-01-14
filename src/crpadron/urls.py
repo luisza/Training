@@ -19,8 +19,11 @@ from padronelectoral import views
 
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
-    path('',views.IndexView.as_view(),name="index.html")
+    path('', views.loadIndex, name='index'),
+    path('search', views.get_electors, name='get_electors'),
+    path('stats/', views.viewStats, name='stats'),
   #  path('stats/<str:pk>/', views.DeleteDistrict, name='deleteDistrict'),
 
 ]
