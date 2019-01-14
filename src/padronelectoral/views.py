@@ -1,37 +1,32 @@
 from django.shortcuts import render
-
+from django.views import generic
+from .models import Elector
+from .forms import SearchForm
 # Create your views here.
-from padronelectoral.models import Elector
 
 
-def loadIndex(request):
-    cantons = []
-    return render(request, 'index.html',{'cantonsList': cantons})
+class IndexView(generic.FormView):
+    template_name = 'index.html'
+
+    def get_elector(request):
+        if request.method == 'POST':
+            context_object_name = 'elector_list'
+            form_class = SearchForm()
+            data = request.POST.get('input')
+            elector_list = []
+            # check if input data is either number or string
+            try:
+                data_id = int(data)
+                elector_list = Elector.objects.filter(idCard__startswith=data_id)
 
 
-def viewStats(request):
-    stats = []
-    return render(request,'stats.html',{'stats':stats})
+            except:
+                elector_list = Elector.objects.filter(fullName__istartswith=data)
+
+        return render(request, 'index.html', {'info': elector_list,'form':form_class})
 
 
-def searchPerson(request):
-    input = request.POST.get('input')
-    filter = {}
-    try:
-        #beacause this variable by default is string. So I try to cast to int in case that this variable
-        #is an ID or except when this is a name or last name
-        inputToInt = int(input)
-        filter = {'id':inputToInt}
-    except:
-        filter = {'name':input}
 
-    print(filter)
 
-    elector = Elector()
-    elector.idCard = 34590943
-#    elector.codelec = 102033
-    elector.junta = 1
-    lista = []
-    lista.append(elector)
 
-    return render(request, 'index.html', {'info': lista})
+

@@ -5,10 +5,10 @@
 
 
 <div align="center">
-    <form class="navbar-form navbar-center" action="{% url 'searchPerson' %}" method="post">
+    <form class="navbar-form navbar-center"  method="post">
       {% csrf_token %}
       <div class="input-group">
-        <input name="input" type="text" class="form-control" placeholder="Search person">
+        {{ form }}
         <div class="input-group-btn">
           <button class="btn btn-default" type="submit">
             <i class="glyphicon glyphicon-search"></i>
@@ -19,12 +19,12 @@
 </div>
 
 <div class="container">
-    <table class="table">
+    <table class="table table-stripped">
         <thead>
             <tr>
                 <td>ID</td>
                 <td>Electoral code</td>
-                <td>Full name</td>
+                <td>Name</td>
                 <td>Board</td>
                 <td>Province</td>
                 <td>Canton</td>
@@ -33,19 +33,19 @@
         </thead>
         <tbody>
             {% if info %}
-            {% for solicitud in info %}
+            {% for elector in info %}
             <tr>
-                <td>{{ solicitud.idCard}}</td>
-                <td> 102033</td>
-                <td> Juan Perez Salazar </td>
-                <td>{{ solicitud.junta }} </td>
-                <td>  Alajuela </td>
-                <td>  San Carlos </td>
-                <td>  Aguas Zarcas </td>
+                <td>{{ elector.idCard }}</td>
+                <td> {{ elector.codelec }}</td>
+                <td> {{ elector.fullName }} </td>
+                <td>{{ elector.board }} </td>
+                <td>  {{ elector.province }} </td>
+                <td> {{ elector.canton }} </td>
+                <td>  {{ elector.district }} </td>
             </tr>
             {% endfor %}
             {% else %}
-            <h2 align="center">No records to show</h2>
+            <tr><td>No results.</td></tr>
             {% endif %}
         </tbody>
         </table>

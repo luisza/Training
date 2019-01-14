@@ -6,13 +6,14 @@ class Province(models.Model):
     name = models.CharField(max_length=10)
 
 class Canton(models.Model):
+    id = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=20)
-    idProvince = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
+    province = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
 
 
 class District(models.Model):
     id = models.SmallIntegerField(primary_key=True)
-    codelec=models.PositiveIntegerField(validators=[MaxValueValidator(999999)])
+    codelec=models.CharField(max_length=6)
     name = models.CharField(max_length=34)
     canton=models.ForeignKey(Canton, on_delete=models.CASCADE)
 
@@ -23,7 +24,4 @@ class Elector(models.Model):
     cad_date = models.DateField()
     board = models.IntegerField(validators=[MaxValueValidator(999999)])
     #not sure that this can be "" by default.
-    fullName = models.CharField(max_length=100,default="")
-    name = models.CharField(max_length=30)
-    lastname1 = models.CharField(max_length=26)
-    lastname2 = models.CharField(max_length=26)
+    fullName = models.CharField(max_length=100)
