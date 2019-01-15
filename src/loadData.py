@@ -18,6 +18,7 @@ def loadData(path, max_len):
         dictionaryToSave = splitLine(line)
         dictionaryList.append(dictionaryToSave)
         if (count > max_len):
+            # Sort in correct way
             tuple = dictionaryListToValues(dictionaryList)
             saveLine(tuple)
             dictionaryList = []
@@ -28,6 +29,12 @@ def loadData(path, max_len):
 
 
 def dictionaryListToValues(dictionaryList):
+    """
+    This function converts to tuple when you pass a dictionary, is used to format field to append in sql
+    values
+    :param dictionaryList:
+    :return:
+    """
     tupleList = [tuple(element.values()) for element in dictionaryList]
     tupleString = ""
     for element in tupleList:

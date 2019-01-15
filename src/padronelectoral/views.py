@@ -1,6 +1,6 @@
 from django.db.models import Count
-from django.shortcuts import render
-from .models import Elector, Province
+from django.shortcuts import render, get_object_or_404
+from .models import Elector, Province, District
 from .forms import SearchForm
 # Create your views here.
 
@@ -80,23 +80,21 @@ def get_canton_data(request):
 
     return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
 
-def get_district_data(request):
-    if request.method == 'GET':
-        totalM = 0
-        totalF = 0
-        totalE = 0
+def get_district_data(request, pk):
+    district = get_object_or_404(District, pk=pk)
+    if district.stats_total == -1:
+        print ("CALCULANDO" )
+        elector_list = Elector.objects.filter(codelec = pk)
+        district.stats_female = elector_list.filter(gender=2).count()
+        district.stats_male = elector_list.filter(gender=1).count()
+        district.stats_total = district.stats_female+district.stats_male
+        district.save()
+    return render(request,'stats.html',{'totalM': district.stats_male,
+                                    'totalF': district.stats_female,
+                                    'totalE': district.stats_total,
+                                    'location':district})
 
-        dist = request.GET.get('dist')
-        elector_list = Elector.objects.filter(codelec = dist)
-        for e in elector_list:
-           if e.gender == 1:
-               totalM +=1
-               totalE +=1
-           else:
-               totalF +=1
-               totalE +=1
 
-        location = elector_list[0].codelec
 
-    return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
-
+class CantonView(DetailView):
+    template = 'canton_template.html'
