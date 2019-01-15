@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import sys
 
 
 def loadData(path, max_len):
@@ -7,6 +8,7 @@ def loadData(path, max_len):
     try:
         print("Loading " + path + " in loadData")
         txtFile = open(path,encoding="ISO-8859-1")
+        txtFile = open(path)
     except:
         print("Can't read this path..")
         return
@@ -111,12 +113,13 @@ def createQuerys(table, dictionaryData):
     valuesTuple = ', '.join(dictionaryData.values())
     return "Insert Into %s (%s) Values (%s) ;" % (table, keysTuple, valuesTuple)
 
-
 def loadDataCodelec(path):
     txtFile = ""
     try:
         print("Loading "+path)
         txtFile = open(path,encoding="ISO-8859-1")
+        txtFile = open(path)
+
     except:
         print("Can't read this path..")
         return
@@ -126,14 +129,8 @@ def loadDataCodelec(path):
 
 
 def defineParameters(pathDistelec, path):
-    round = 15
-    loadDataCodelec(pathDistelec)
-    loadData(path, round)
-
-
-import sys
-if len(sys.argv) < 3:
-    print("Help:  python loadData.py <diselect path>  <registry path>")
+    if len(sys.argv) < 3:
+        print("Help:  python loadData.py <diselect path>  <registry path>")
     exit(1)
 
 defineParameters(sys.argv[1], sys.argv[2] )
