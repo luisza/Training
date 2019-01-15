@@ -27,3 +27,64 @@ def get_electors(request):
             elector_list = Elector.objects.filter(fullName__istartswith = data)
 
         return render(request,'index.html',{'info':elector_list})
+
+def get_province_data(request):
+    if request.method == 'GET':
+        totalM = 0
+        totalF = 0
+        totalE = 0
+
+        prov = request.GET.get('prov')
+        elector_list = Elector.objects.filter(codelec__canton__province = prov)
+        for e in elector_list:
+           if e.gender == 1:
+               totalM +=1
+               totalE +=1
+           else:
+               totalF +=1
+               totalE +=1
+
+        location = elector_list[0].codelec.canton.province
+
+    return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
+
+def get_canton_data(request):
+    if request.method == 'GET':
+        totalM = 0
+        totalF = 0
+        totalE = 0
+
+        cant = request.GET.get('cant')
+        elector_list = Elector.objects.filter(codelec__canton = cant)
+        for e in elector_list:
+           if e.gender == 1:
+               totalM +=1
+               totalE +=1
+           else:
+               totalF +=1
+               totalE +=1
+
+        location = elector_list[0].codelec.canton
+
+    return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
+
+def get_district_data(request):
+    if request.method == 'GET':
+        totalM = 0
+        totalF = 0
+        totalE = 0
+
+        dist = request.GET.get('dist')
+        elector_list = Elector.objects.filter(codelec = dist)
+        for e in elector_list:
+           if e.gender == 1:
+               totalM +=1
+               totalE +=1
+           else:
+               totalF +=1
+               totalE +=1
+
+        location = elector_list[0].codelec
+
+    return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
+

@@ -23,7 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.loadIndex, name='index'),
     path('search', views.get_electors, name='get_electors'),
-    path('stats/', views.viewStats, name='stats'),
+    path('stats/', views.get_province_data, name='get_province_data'),
+    path('stats/', views.get_canton_data, name='get_canton_data'),
+    path('stats/', views.get_district_data, name='get_district_data'),
   #  path('stats/<str:pk>/', views.DeleteDistrict, name='deleteDistrict'),
 
 ]

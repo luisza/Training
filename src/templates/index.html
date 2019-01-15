@@ -36,12 +36,12 @@
             {% for elector in info %}
             <tr>
                 <td>{{ elector.idCard }}</td>
-                <td> {{ elector.codelec }}</td>
+                <td> {{ elector.codelec.codelec }}</td>
                 <td> {{ elector.fullName }} </td>
                 <td>{{ elector.board }} </td>
-                <td>  {{ elector.province }} </td>
-                <td> {{ elector.canton }} </td>
-                <td>  {{ elector.district }} </td>
+                <td> <a href="{% url 'get_province_data' %}?prov={{elector.codelec.canton.province.id}}" name="prov" > {{ elector.codelec.canton.province }} </a> </td>
+                <td> <a href="{% url 'get_canton_data' %}?cant={{elector.codelec.canton.id}}" name="cant"> {{ elector.codelec.canton }} </a> </td>
+                <td> <a href="{% url 'get_district_data' %}?dist={{elector.codelec.codelec}}" name="dist"> {{ elector.codelec }} </a></td>
             </tr>
             {% endfor %}
             {% else %}
