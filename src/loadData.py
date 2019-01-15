@@ -64,15 +64,15 @@ def splitLineCodelec(line):
     global cantonIdAux
     split = line.split(",")
     codelec = split[0]
-    provinceData = {'id': codelec[0],
-                   'name':split[1]}
-    cantonData = {'id': codelec[1:3],
-                  'name': split[2],
-                  'province': codelec[0]}
-    districtData = {'id': codelec[3:],
+    provinceData = {'code': codelec[0],
+                   'name': "'"+ split[1]+"'"}
+    cantonData = {'code': codelec[1:3],
+                  'name': "'"+str(split[2])+"'",
+                  'province_id': codelec[0]}
+    districtData = {'code': codelec[3:],
                     'codelec': codelec,
-                    'name': split[3].strip(),
-                    'canton': codelec[1:3]}
+                    'name': "'"+(split[3].strip())+"'",
+                    'canton_id': codelec[1:3]}
 
     #this if is needed because in case that not exist, the file will append repeat data many times
     if(provinceIdAux!=codelec[0]):
@@ -115,6 +115,6 @@ def defineParameters():
     round = 15
 
     loadDataCodelec(pathDistelec)
-    loadData(path, round)
+   # loadData(path, round)
 
 defineParameters()

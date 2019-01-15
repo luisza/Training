@@ -2,14 +2,14 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 # Create your models here.
 class Province(models.Model):
-    id = models.SmallIntegerField(primary_key=True)
+    code = models.SmallIntegerField(default=1)
     name = models.CharField(max_length=10)
 
     def __str__(self):
         return self.name
 
 class Canton(models.Model):
-    id = models.SmallIntegerField(primary_key=True)
+    code = models.SmallIntegerField(default=1)
     name = models.CharField(max_length=20)
     province = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
 
@@ -18,7 +18,7 @@ class Canton(models.Model):
 
 
 class District(models.Model):
-    id = models.SmallIntegerField(primary_key=True)
+    code = models.SmallIntegerField(default=1)
     codelec=models.CharField(max_length=6)
     name = models.CharField(max_length=34)
     canton=models.ForeignKey(Canton, on_delete=models.CASCADE)
