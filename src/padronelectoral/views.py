@@ -1,5 +1,6 @@
+from django.db.models import Count
 from django.shortcuts import render
-from .models import Elector
+from .models import Elector, Province
 from .forms import SearchForm
 # Create your views here.
 
@@ -45,7 +46,18 @@ def get_province_data(request):
                totalE +=1
 
         location = elector_list[0].codelec.canton.province
+    '''
+    elector_prov = Elector.objects.filter(codelec__canton__province=prov)
+    m = elector_prov.filter(gender=1).count()
+    f = elector_prov.filter(gender=2).count()
+    total = elector_prov.count()
+    prov = Province.object.all().aggregate(
+        sumfemale=Count(canton_district_codelec_gender=2),
+        summale=Count(canton_district_codelec_gender=1))
 
+    prov.sumfemale
+    prov.summale 
+    '''
     return render(request,'stats.html',{'totalM':totalM,'totalF':totalF,'totalE':totalE,'location':location})
 
 def get_canton_data(request):

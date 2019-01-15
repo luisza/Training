@@ -1,7 +1,11 @@
+from collections import OrderedDict
+
+
 def loadData(path, max_len):
     count = 0
     txtFile = ""
     try:
+        print("Loading " + path + " in loadData")
         txtFile = open(path,encoding="ISO-8859-1")
     except:
         print("Can't read this path..")
@@ -43,18 +47,22 @@ def saveLine(values):
 
 def splitLine(line):
     split = line.split(",")
-    fullName = "%s %s %s" % (split[5].strip(), split[6].strip(), split[7].strip())
-    orderedInfo = {
-        'idCard': split[0],
-        'gender': split[2],
-        'cad_date': split[3],
-        'board': split[4],
-        'fullName': fullName,
+    try:
+        fullName = "%s %s %s" % (split[5].strip(), split[6].strip(), split[7].strip())
+    except:
+        print("ERROR ", split)
+        raise
+    orderedInfo = OrderedDict()
+    orderedInfo['idCard']= split[0]
+    orderedInfo['gender']= split[2]
+    orderedInfo['cad_date']= split[3]
+    orderedInfo['board']= split[4]
+    orderedInfo['fullName']= fullName
         #'name': split[5].strip(),
         #'lastname1': split[6].strip(),
         #'lastname2': split[7].strip(),
-        'codelec': split[1]
-    }
+    orderedInfo['codelec_id']= split[1]
+
     return orderedInfo
 
 provinceIdAux = 0
@@ -100,6 +108,7 @@ def createQuerys(table, dictionaryData):
 def loadDataCodelec(path):
     txtFile = ""
     try:
+        print("Loading "+path)
         txtFile = open(path,encoding="ISO-8859-1")
     except:
         print("Can't read this path..")
@@ -109,12 +118,15 @@ def loadDataCodelec(path):
         splitLineCodelec(line)
 
 
-def defineParameters():
-    path = '/home/alejandro/Escritorio/PADRON_COMPLETO.txt'
-    pathDistelec = '/home/alejandro/Descargas/padron_completo/Distelec.txt'
+def defineParameters(pathDistelec, path):
     round = 15
-
     loadDataCodelec(pathDistelec)
     loadData(path, round)
 
-defineParameters()
+
+import sys
+if len(sys.argv) < 3:
+    print("Help:  python loadData.py <diselect path>  <registry path>")
+    exit(1)
+
+defineParameters(sys.argv[1], sys.argv[2] )
