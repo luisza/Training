@@ -18,8 +18,7 @@ class Canton(models.Model):
 
 
 class District(models.Model):
-    code = models.SmallIntegerField(default=1)
-    codelec=models.CharField(max_length=6)
+    codelec=models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999999)])
     name = models.CharField(max_length=34)
     canton=models.ForeignKey(Canton, on_delete=models.CASCADE)
 

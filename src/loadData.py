@@ -2,7 +2,7 @@ def loadData(path, max_len):
     count = 0
     txtFile = ""
     try:
-        txtFile = open(path)
+        txtFile = open(path,encoding="ISO-8859-1")
     except:
         print("Can't read this path..")
         return
@@ -36,7 +36,7 @@ def dictionaryListToValues(dictionaryList):
 
 
 def saveLine(values):
-    sql = "INSERT INTO %s (idCard, gender, cad_date, board, fullName, name, lastname1, lastname2, codelec_id) VALUES %s;" % (
+    sql = "INSERT INTO %s (idCard, gender, cad_date, board, fullName, codelec_id) VALUES %s;" % (
         'padronelectoral_elector', values)
     sqlFile = open("querys.sql", "a")
     sqlFile.write(sql)
@@ -50,9 +50,9 @@ def splitLine(line):
         'cad_date': split[3],
         'board': split[4],
         'fullName': fullName,
-        'name': split[5].strip(),
-        'lastname1': split[6].strip(),
-        'lastname2': split[7].strip(),
+        #'name': split[5].strip(),
+        #'lastname1': split[6].strip(),
+        #'lastname2': split[7].strip(),
         'codelec': split[1]
     }
     return orderedInfo
@@ -69,7 +69,7 @@ def splitLineCodelec(line):
     cantonData = {'code': codelec[1:3],
                   'name': "'"+str(split[2])+"'",
                   'province_id': codelec[0]}
-    districtData = {'code': codelec[3:],
+    districtData = {#'code': codelec[3:],
                     'codelec': codelec,
                     'name': "'"+(split[3].strip())+"'",
                     'canton_id': codelec[1:3]}
@@ -100,7 +100,7 @@ def createQuerys(table, dictionaryData):
 def loadDataCodelec(path):
     txtFile = ""
     try:
-        txtFile = open(path)
+        txtFile = open(path,encoding="ISO-8859-1")
     except:
         print("Can't read this path..")
         return
@@ -110,11 +110,11 @@ def loadDataCodelec(path):
 
 
 def defineParameters():
-    path = '/home/miguelmendezrojas/Descargas/padron_completo/PADRON_COMPLETO.txt'
-    pathDistelec = '/home/miguelmendezrojas/Descargas/padron_completo/Distelec.txt'
+    path = '/home/alejandro/Escritorio/PADRON_COMPLETO.txt'
+    pathDistelec = '/home/alejandro/Descargas/padron_completo/Distelec.txt'
     round = 15
 
     loadDataCodelec(pathDistelec)
-   # loadData(path, round)
+    loadData(path, round)
 
 defineParameters()
