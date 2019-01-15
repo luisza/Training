@@ -106,3 +106,5 @@ venv.bak/
 \.idea/
 
 src/crpadron/settings\.py
+
+src/loadData\.py
