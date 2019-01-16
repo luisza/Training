@@ -2,42 +2,46 @@ from collections import OrderedDict
 import sys
 
 
-def loadData(path, max_len):
+def loadDataElector(path, max_len):
+    """
+    This function receive the path and try to convert to a sql file.
+    :param path:
+    :param max_len:
+    :return:
+    """
     count = 0
     txtFile = ""
     try:
         print("Loading " + path + " in loadData")
-        txtFile = open(path,encoding="ISO-8859-1")
         txtFile = open(path)
     except:
         print("Can't read this path..")
         return
 
     linesList = txtFile.readlines()
-    dictionaryList = []
+    tupleList = []
 
     for line in linesList:
-        dictionaryToSave = splitLine(line)
-        dictionaryList.append(dictionaryToSave)
+        tupleToSave = splitLine(line)
+        tupleList.append(tupleToSave)
         if (count > max_len):
-            # Sort in correct way
-            tuple = dictionaryListToValues(dictionaryList)
-            saveLine(tuple)
-            dictionaryList = []
+            #create a list of tuples with de values format in sql
+            tupleListValues = createTupleListValues(tupleList)
+            saveLine(tupleListValues)
+            tupleList = []
             count = 0
         count += 1
 
     print("Success")
 
 
-def dictionaryListToValues(dictionaryList):
+def createTupleListValues(tupleList):
     """
     This function converts to tuple when you pass a dictionary, is used to format field to append in sql
     values
     :param dictionaryList:
     :return:
     """
-    tupleList = [tuple(element.values()) for element in dictionaryList]
     tupleString = ""
     for element in tupleList:
         # this validation is because mysql does not recognize a comma at the end of the values
@@ -61,18 +65,11 @@ def splitLine(line):
     except:
         print("ERROR ", split)
         raise
-    orderedInfo = OrderedDict()
-    orderedInfo['idCard']= split[0]
-    orderedInfo['gender']= split[2]
-    orderedInfo['cad_date']= split[3]
-    orderedInfo['board']= split[4]
-    orderedInfo['fullName']= fullName
-        #'name': split[5].strip(),
-        #'lastname1': split[6].strip(),
-        #'lastname2': split[7].strip(),
-    orderedInfo['codelec_id']= split[1]
+    # this is the order: (idCard, gender, cad_date, board, fullName, codelec_id)
+    splitTuple = (split[0], split[2], split[3], split[4], fullName, split[1])
 
-    return orderedInfo
+    return splitTuple
+
 
 provinceIdAux = 0
 cantonIdAux = 0
@@ -81,43 +78,38 @@ def splitLineCodelec(line):
     global cantonIdAux
     split = line.split(",")
     codelec = split[0]
-    provinceData = {'code': codelec[0],
-                   'name': "'"+ split[1]+"'"}
-    cantonData = {'code': codelec[1:3],
-                  'name': "'"+str(split[2])+"'",
-                  'province_id': codelec[0]}
-    districtData = {#'code': codelec[3:],
-                    'codelec': codelec,
-                    'name': "'"+(split[3].strip())+"'",
-                    'canton_id': codelec[1:3]}
+
+    provinceData = (codelec[0], split[1])
+    cantonData =  (codelec[1:3],str(split[2]),codelec[0] )
+    districtData = (codelec,(split[3].strip()),codelec[1:3])
 
     #this if is needed because in case that not exist, the file will append repeat data many times
     if(provinceIdAux!=codelec[0]):
-        queryProvince = createQuerys('padronelectoral_province', provinceData)
+        orderValuesProvince = "code, name"
+        queryProvince = createQuerys(orderValuesProvince, 'padronelectoral_province', provinceData)
         sqlFileP = open("querysProvince.sql", "a")
         sqlFileP.write(queryProvince)
         provinceIdAux = codelec[0]
 
     if(cantonIdAux!=codelec[1:3]):
-        queryCanton = createQuerys('padronelectoral_canton', cantonData)
+        orderValuesCanton = "code, name,province_id"
+        queryCanton = createQuerys(orderValuesCanton, 'padronelectoral_canton', cantonData)
         sqlFileC = open("querysCanton.sql", "a")
         sqlFileC.write(queryCanton)
         cantonIdAux = codelec[1:3]
 
-    queryDistrict = createQuerys('padronelectoral_district', districtData)
+    orderValuesDistrict = "codelec, name, canton_id"
+    queryDistrict = createQuerys(orderValuesDistrict, 'padronelectoral_district', districtData)
     sqlFileD = open("querysDistrict.sql", "a")
     sqlFileD.write(queryDistrict)
 
-def createQuerys(table, dictionaryData):
-    keysTuple = ', '.join(dictionaryData.keys())
-    valuesTuple = ', '.join(dictionaryData.values())
-    return "Insert Into %s (%s) Values (%s) ;" % (table, keysTuple, valuesTuple)
+def createQuerys(values, table, valuesTuple):
+    return "Insert Into %s (%s) Values %s;" % (table, values, valuesTuple)
 
 def loadDataCodelec(path):
     txtFile = ""
     try:
         print("Loading "+path)
-        txtFile = open(path,encoding="ISO-8859-1")
         txtFile = open(path)
 
     except:
@@ -131,6 +123,12 @@ def loadDataCodelec(path):
 def defineParameters(pathDistelec, path):
     if len(sys.argv) < 3:
         print("Help:  python loadData.py <diselect path>  <registry path>")
-    exit(1)
+        return
+    loadDataElector(path, 1000)
 
-defineParameters(sys.argv[1], sys.argv[2] )
+    loadDataCodelec(pathDistelec)
+
+defineParameters(sys.argv[1], sys.argv[2])
+
+#/home/miguelmendezrojas/Descargas/padron_completo/Distelec.txt
+#/home/miguelmendezrojas/Descargas/padron_completo/PADRON_COMPLETO.txt
