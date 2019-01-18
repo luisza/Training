@@ -19,6 +19,7 @@ class Canton(models.Model):
     stats_female = models.IntegerField(default=-1, null=True)
     stats_male = models.IntegerField(default=-1, null=True)
     stats_total = models.IntegerField(default=-1, null=True)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
