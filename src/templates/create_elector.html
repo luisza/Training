@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content%}
+<body>
+<div>
+    <h1 align="left" style="width:100%;"> Add New Elector</h1>
+</div>
+<form method="POST">
+   <div>
+       {% csrf_token %}
+       {{form}}
+   </div>
+    <div>
+       <button type="submit"> Save new Elector </button>
+    </div>
+</form>
+</body>
+{% endblock %}
