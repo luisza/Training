@@ -38,7 +38,7 @@ Using mysql client import those files in the same order as show after
    mysql -u solvo -psolvop4ss -D padron < querysProvince.sql
    mysql -u solvo -psolvop4ss -D padron < querysCanton.sql
    mysql -u solvo -psolvop4ss -D padron < querysDistrict.sql
-   mysql -u solvo -psolvop4ss -D padron < querys.sql
+   mysql -u solvo -psolvop4ss -D padron < querysElector.sql
 
 
 
