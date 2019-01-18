@@ -13,7 +13,7 @@ def loadDataElector(path, max_len):
     txtFile = ""
     try:
         print("Loading " + path + " in loadData")
-        txtFile = open(path)
+        txtFile = open(path,encoding="ISO-8859-1")
     except:
         print("Can't read this path..")
         return
@@ -80,8 +80,8 @@ def splitLineCodelec(line):
     codelec = split[0]
 
     provinceData = (codelec[0], split[1])
-    cantonData =  (codelec[1:3],str(split[2]),codelec[0] )
-    districtData = (codelec,(split[3].strip()),codelec[1:3])
+    cantonData =  (codelec[0]+codelec[1:3],str(split[2]),codelec[0] )
+    districtData = (codelec,(split[3].strip()),codelec[0]+codelec[1:3])
 
     #this if is needed because in case that not exist, the file will append repeat data many times
     if(provinceIdAux!=codelec[0]):
@@ -110,7 +110,7 @@ def loadDataCodelec(path):
     txtFile = ""
     try:
         print("Loading "+path)
-        txtFile = open(path)
+        txtFile = open(path,encoding="ISO-8859-1")
 
     except:
         print("Can't read this path..")
