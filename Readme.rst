@@ -27,7 +27,7 @@ This command create the files:
 - querysProvince.sql
 - querysCanton.sql
 - querysDistrict.sql
-- querys.sql
+- querysElector.sql
 
 Using mysql client import those files in the same order as show after
 

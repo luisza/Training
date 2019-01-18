@@ -55,7 +55,7 @@ def get_province_data(request,pk):
 
 
 def get_canton_data(request,pk):
-    canton = get_object_or_404(Canton, id=pk)
+    canton = get_object_or_404(Canton, pk=pk)
     if canton.stats_total == None:
         print("--Calculating--")
         elector_list_by_canton = Elector.objects.filter(codelec__canton= canton)
@@ -98,5 +98,5 @@ def createElector(request):
         return redirect('loadIndex')
     return render(request, 'create_elector.html', {'form': form})
 
-class CantonView(DetailView):
-    template = 'canton_template.html'
+#class CantonView(DetailView):
+#    template = 'canton_template.html'

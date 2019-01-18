@@ -39,8 +39,8 @@
                 <td> {{ elector.codelec.codelec}}</td>
                 <td> {{ elector.fullName }} </td>
                 <td>{{ elector.board }} </td>
-                <td> <a href="{% url 'get_province_data' elector.codelec.canton.province.id %}" name="prov" > {{ elector.codelec.canton.province }} </a> </td>
-                <td> <a href="{% url 'get_canton_data' elector.codelec.canton.id %}" name="cant"> {{ elector.codelec.canton}} </a></td>
+                <td> <a href="{% url 'get_province_data' elector.codelec.canton.province.code %}" name="prov" > {{ elector.codelec.canton.province }} </a> </td>
+                <td> <a href="{% url 'get_canton_data' elector.codelec.canton.code %}" name="cant"> {{ elector.codelec.canton}} </a></td>
                 <td> <a href="{% url 'get_district_data' elector.codelec.codelec %}" name="dist"> {{ elector.codelec }} </a></td>
             </tr>
             {% endfor %}
