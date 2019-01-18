@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 # Create your models here.
 class Province(models.Model):
-    code = models.SmallIntegerField(default=1)
+    code = models.SmallIntegerField()
     name = models.CharField(max_length=10)
     stats_female = models.IntegerField(default=-1, null=True)
     stats_male = models.IntegerField(default=-1, null=True)
@@ -14,9 +14,8 @@ class Province(models.Model):
         return self.name
 
 class Canton(models.Model):
-    code = models.SmallIntegerField(default=1)
+    code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=30)
-    province = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
     stats_female = models.IntegerField(default=-1, null=True)
     stats_male = models.IntegerField(default=-1, null=True)
     stats_total = models.IntegerField(default=-1, null=True)
@@ -26,7 +25,7 @@ class Canton(models.Model):
 
 
 class District(models.Model):
-    codelec= models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999999)])
+    codelec=models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999)])
     name = models.CharField(max_length=34)
     canton=models.ForeignKey(Canton, on_delete=models.CASCADE)
     stats_female = models.IntegerField(default=-1, null=True)

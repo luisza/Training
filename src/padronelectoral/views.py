@@ -1,7 +1,10 @@
 from django.db.models import Count
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import SearchForm, ElectorForm
+from django.contrib.auth.decorators import login_required
+
+
 from .models import Elector, Province, District, Canton
-from .forms import SearchForm
 # Create your views here.
 
 
@@ -9,7 +12,7 @@ def loadIndex(request):
     return render(request, 'index.html')
 
 def get_electors(request):
-    if request.method=='POST':
+    if request.method == 'POST':
         elector_list = []
         data = request.POST.get('input')
         try:
@@ -17,9 +20,9 @@ def get_electors(request):
             elector = get_object_or_404(Elector, pk=data_id)
             elector_list.append(elector)
         except:
-            elector_list = Elector.objects.filter(fullName__istartswith = data)
+            elector_list = Elector.objects.filter(fullName__istartswith=data)
 
-        return render(request,'index.html',{'info':elector_list})
+        return render(request, 'index.html', {'info': elector_list})
 
 
 
@@ -79,14 +82,21 @@ def get_district_data(request, pk):
         elector_list = Elector.objects.filter(codelec = pk)
         district.stats_female = elector_list.filter(gender=2).count()
         district.stats_male = elector_list.filter(gender=1).count()
-        district.stats_total = district.stats_female+district.stats_male
+        district.stats_total = district.stats_female + district.stats_male
         district.save()
-    return render(request,'stats.html',{'totalM': district.stats_male,
-                                    'totalF': district.stats_female,
-                                    'totalE': district.stats_total,
-                                    'location':district})
+    return render(request, 'stats.html', {'totalM': district.stats_male,
+                                          'totalF': district.stats_female,
+                                          'totalE': district.stats_total,
+                                          'location': district})
 
 
+@login_required
+def createElector(request):
+    form = ElectorForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return redirect('loadIndex')
+    return render(request, 'create_elector.html', {'form': form})
 
-#class CantonView(DetailView):
-#    template = 'canton_template.html'
+class CantonView(DetailView):
+    template = 'canton_template.html'
