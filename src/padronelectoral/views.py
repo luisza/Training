@@ -106,7 +106,7 @@ def get_district_electors(request,pk):
     district = get_object_or_404(District,pk=pk)
     return render(request,'district-data.html',{'district':district,'codelec':pk})
 
-class ElectorsOnDistrict(APIView):
+class ElectorsOnDistrict(APIViewdd):
     #Class using django rest serializer to return a JSON readable by the datatables
 
     def get(self,request,pk):
