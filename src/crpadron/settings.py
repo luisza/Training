@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'padronelectoral'
+    'padronelectoral',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,5 @@ STATICFILES_DIRS = [
 
 
 STATIC_URL = '/patitic/static/'
+
+

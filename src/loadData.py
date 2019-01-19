@@ -159,7 +159,7 @@ def defineParameters(pathDistelec, path):
     if len(sys.argv) < 3:
         print("Help:  python loadData.py <diselect path>  <registry path>")
         return
-    loadDataElector(path, 100000)
+    loadDataElector(path, 10000)
     loadDataCodelec(pathDistelec)
 
 #receive the codelec and padron_electoral paths in the parameters in the first call
