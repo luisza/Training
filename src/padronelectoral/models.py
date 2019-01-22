@@ -6,13 +6,19 @@ from django.utils.safestring import mark_safe
 class Province(models.Model):
     code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=10)
+    stats_female = models.IntegerField(default=-1, null=True)
+    stats_male = models.IntegerField(default=-1, null=True)
+    stats_total = models.IntegerField(default=-1, null=True)
 
     def __str__(self):
         return self.name
 
 class Canton(models.Model):
-    code = models.SmallIntegerField(primary_key=True)
+    code = models.SmallIntegerField(default=1)
     name = models.CharField(max_length=30)
+    stats_female = models.IntegerField(default=-1, null=True)
+    stats_male = models.IntegerField(default=-1, null=True)
+    stats_total = models.IntegerField(default=-1, null=True)
     province = models.ForeignKey(Province, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -32,9 +38,9 @@ class District(models.Model):
         return self.name
 
 class Elector(models.Model):
-    GENDER =(
-    (1, 'Male'),
-    (2, "Female"))
+    GENDER = (
+        (1, 'Male'),
+        (2, "Female"))
     idCard = models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999999)])
     codelec = models.ForeignKey(District, on_delete=models.CASCADE)
     gender = models.SmallIntegerField(choices=GENDER)
