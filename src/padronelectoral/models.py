@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+
 
 # Create your models here.
 class Province(models.Model):
@@ -43,7 +45,8 @@ class Elector(models.Model):
         (2, "Female"))
     idCard = models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999999)])
     codelec = models.ForeignKey(District, on_delete=models.CASCADE)
-    gender = models.SmallIntegerField(choices=GENDER)
+    gender = models.SmallIntegerField(choices=GENDER, verbose_name=_("Genero"),
+                                      help_text=_("Hombre o mujer"))
     cad_date = models.DateField()
     board = models.IntegerField(validators=[MaxValueValidator(999999)])
     #not sure that this can be "" by default.
