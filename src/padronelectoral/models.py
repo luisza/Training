@@ -4,16 +4,16 @@ from django.utils.safestring import mark_safe
 
 # Create your models here.
 class Province(models.Model):
-    code = models.SmallIntegerField(default=1)
+    code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=10)
 
     def __str__(self):
         return self.name
 
 class Canton(models.Model):
-    code = models.SmallIntegerField(default=1)
+    code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=30)
-    province = models.ForeignKey(Province,on_delete=models.CASCADE, default=1)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

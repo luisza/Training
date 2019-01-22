@@ -1,6 +1,8 @@
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
-from .models import Elector, Province, District
+from django import forms
+from .models import Elector, Province, District, Canton
+from django.views.generic.detail import DetailView
 from .forms import SearchForm
 # Create your views here.
 
@@ -96,5 +98,29 @@ def get_district_data(request, pk):
 
 
 
+class CantonForm(forms.ModelForm):
+    alcalde = forms.CharField()
+
+    # def save(self, *args):
+    #     # do something
+    #     # self.instance
+    #     instance =  super(CantonForm, self).save(*args)
+    #     instance.alcalde = self.cleaned_data['alcalde']
+    #     return instance
+    class Meta:
+        model = Canton
+        fields = '__all__'
+from django.forms import modelform_factory
+
 class CantonView(DetailView):
-    template = 'canton_template.html'
+    template_name = 'canton_template.html'
+    model = Canton
+
+    def get_context_data(self, **kwargs):
+        context = super(CantonView, self).get_context_data(**kwargs)
+        context['districts'] = context['object'].district_set.all()
+        context['form'] = CantonForm()
+        context['formdist'] = modelform_factory(District,
+                                                exclude=('stats_female', 'stats_male'),
+                                                fields='__all__')
+        return context
