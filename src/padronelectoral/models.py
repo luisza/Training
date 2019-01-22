@@ -14,7 +14,7 @@ class Province(models.Model):
         return self.name
 
 class Canton(models.Model):
-    code = models.SmallIntegerField(default=1)
+    code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=30)
     stats_female = models.IntegerField(default=-1, null=True)
     stats_male = models.IntegerField(default=-1, null=True)
