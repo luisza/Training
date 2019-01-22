@@ -36,6 +36,7 @@
     </div>
 
     {% block js %}
+    <script>var urlDatatb ='{% url "datatables_data" codelec %}';</script>
     <script src="{% static 'js/main.js' %}"></script>
     {% endblock %}
 </div>

@@ -45,7 +45,7 @@ class Elector(models.Model):
     cad_date = models.DateField()
     board = models.IntegerField(validators=[MaxValueValidator(999999)])
     #not sure that this can be "" by default.
-    fullName = models.CharField(max_length=100)
+    fullName = models.CharField(max_length=100, db_index=True)
     codelec = models.ForeignKey(District, on_delete=models.CASCADE)
 
     def __str__(self):
