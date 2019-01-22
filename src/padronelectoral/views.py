@@ -1,7 +1,9 @@
 from django.db.models import Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import SearchForm, ElectorForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 from .models import Elector, Province, District, Canton
@@ -92,10 +94,12 @@ def get_district_data(request, pk):
 
 @login_required
 def createElector(request):
-    form = ElectorForm(request.POST)
+    form = ElectorForm(request.POST or None)
     if form.is_valid():
         form.save()
-        return redirect('loadIndex')
+        messages.success(request, ' New Elector Successfully Added')
+        form = ElectorForm()
+        #return HttpResponseRedirect('/')
     return render(request, 'create_elector.html', {'form': form})
 
 #class CantonView(DetailView):
