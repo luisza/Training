@@ -4,51 +4,20 @@
 <div>
     <h1 align="left" style="width:100%;"> Add New Elector</h1>
 </div>
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li
+    {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <form method="POST">
     {% csrf_token %}
-    <div>
-        {{ form.idCard.errors }}
-        {{ form.idCard.label_tag }}
-        {{ form.idCard }}
-
-    </div>
-
-    <div>
-        {{ form.fullName.errors }}
-        {{ form.fullName.label_tag }}
-        {{ form.fullName }}
-
-    </div>
-    <div>
-
-        {{ form.gender.errors }}
-        {{ form.gender.label_tag }}
-        {{ form.gender }}
-
-    </div>
-    <div>
-
-        {{ form.cad_date.errors }}
-        {{ form.cad_date.label_tag }}
-        {{ form.cad_date }}
-
-    </div>
-    <div>
-
-        {{ form.codelec.errors }}
-        {{ form.codelec.label_tag }}
-        {{ form.codelec }}
-
-    </div>
-
-
-    <div>
-
-        {{ form.board.errors }}
-        {{ form.board.label_tag }}
-        {{ form.board }}
-
-    </div>
+ <table>
+     {{form}}
+ </table>
 
 
     <div>

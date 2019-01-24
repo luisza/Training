@@ -11,8 +11,8 @@ urlpatterns = [
     path('stats/district/<int:pk>', views.get_district_data, name='get_district_data'),
 
     path('district-data/<int:pk>', views.get_district_electors, name='get_district_data'),
-    path('district-electors/<int:pk>',views.ElectorsOnDistrict.as_view(), name='datatables_data')
-#    path('newelector',views.createElector,name='new_elector')
+    path('district-electors/<int:pk>',views.ElectorsOnDistrict.as_view(), name='datatables_data'),
+    path('newelector',views.createElector,name='new_elector')
 
     #  path('stats/<str:pk>/', views.DeleteDistrict, name='deleteDistrict'),
 ]
