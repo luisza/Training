@@ -20,25 +20,8 @@ Unzip the file and run
 
 ::
 
-   python loadData.py <diselect path>  <registry path>
+   python manage.py  importregistry  <registry path> <diselect path>
 
-This command create the files:
-
-- querysProvince.sql
-- querysCanton.sql
-- querysDistrict.sql
-- querysElector.sql
-
-Using mysql client import those files in the same order as show after
-
-:important: You must need to change the database credentials
-
-::
-
-   mysql -u solvo -psolvop4ss -D padron < querysProvince.sql
-   mysql -u solvo -psolvop4ss -D padron < querysCanton.sql
-   mysql -u solvo -psolvop4ss -D padron < querysDistrict.sql
-   mysql -u solvo -psolvop4ss -D padron < querysElector.sql
 
 
 
