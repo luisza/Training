@@ -3,3 +3,4 @@ mysqlclient==1.4.1
 pytz==2018.9
 djangorestframework==3.9.1
 django-debug-toolbar
+pymongo==3.7.2
