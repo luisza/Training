@@ -1,14 +1,17 @@
 import argparse
 import time
 import logging
-
+from pymongo import MongoClient
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.db.models import signals
 from padronelectoral.models import District, Province, Canton, Elector
 from padronelectoral.signals import update_district
 
+from src.crpadron import settings
+
 logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     help = 'Import CR registry '
@@ -25,7 +28,7 @@ class Command(BaseCommand):
 
         parser.add_argument('registry', type=argparse.FileType('r', encoding="ISO-8859-1"),
                             help='Path to PADRON_COMPLETO.txt')
-        parser.add_argument('diselect', type=argparse.FileType('r', encoding="ISO-8859-1"),
+        parser.add_argument('distelec', type=argparse.FileType('r', encoding="ISO-8859-1"),
                             help='Path to Distelec.txt')
         parser.add_argument(
             '--truncate',
@@ -43,6 +46,22 @@ class Command(BaseCommand):
             help='',
         )
 
+        parser.add_argument(
+            '--orm',
+            dest='MySql',
+            default=True,
+            type=bool,
+            help='ORM Database.',
+        )
+
+        parser.add_argument(
+            '--mdb',
+            dest='Mongo Db',
+            default=True,
+            type=bool,
+            help='Mongo Database',
+        )
+
     def calculate_speed(self, func, message, *args):
         """
         Calculate the time spend by a function call
@@ -54,7 +73,7 @@ class Command(BaseCommand):
         start = time.time()
         func(*args)
         end = time.time()
-        print("Complete %s in "%message, end - start, " s")
+        print("Complete %s in " % message, end - start, " s")
 
     def handle(self, *args, **options):
         """
@@ -66,7 +85,7 @@ class Command(BaseCommand):
             logger.info("Cleanup datatables")
             self.calculate_speed(self.clean_tables, "Cleaning datatables")
 
-        self.calculate_speed(self.import_districts,"Importing districts", options)
+        self.calculate_speed(self.import_districts, "Importing districts", options)
         self.calculate_speed(self.import_registry, "Importing registry", options)
         self.calculate_speed(self.calculate_stats, "Calculating stats")
         end = time.time()
@@ -85,49 +104,8 @@ class Command(BaseCommand):
         # Using cascade aproach to delete other tables
         print(Province.objects.all().delete())
 
-
-    def get_canton(self, province, name, code):
-        """
-        Return a canton based on the name and code passed to function.
-
-        :param province: province name
-        :param name: canton name
-        :param code: district code
-        :return: Django Canton model
-        """
-        cantonid = code[:3]
-        if cantonid not in self.cantons:
-            province, created = Province.objects.get_or_create(
-                code=code[0],
-                name=province.strip()
-            )
-            canton, created = Canton.objects.get_or_create(
-                code=cantonid,
-                name=name.strip(),
-                province=province)
-            self.cantons[cantonid] = canton
-        return self.cantons[cantonid]
-
-    def import_districts(self, options):
-        """
-        Import all districts form diselect.txt file.
-
-        :param options: Argparse arguments (required diselect)
-        """
-        print("Importing Districts ")
-        distrits = []
-        for line in options['diselect'].readlines():
-            code, province, canton, distr = line.split(',')
-            objcanton = self.get_canton(province, canton, code)
-
-            distrits.append(District(
-                codelec=code,
-                name=distr.strip(),
-                canton=objcanton
-            ))
-        District.objects.bulk_create(distrits)
-        print("Importing %d districts " % (len(distrits)))
-        logger.info("Importing %d districts " % (len(distrits)))
+    def get_loader(self,options):
+        pass
 
     def get_values_from_file(self, options):
         """
@@ -159,10 +137,10 @@ class Command(BaseCommand):
         count = 0
         with connection.cursor() as cursor:
             for values in self.get_values_from_file(options):
-                #print(sql%values)
-                cursor.execute(sql%(values,) )
+                # print(sql%values)
+                cursor.execute(sql % (values,))
                 count += options['truncate']
-                print("Importing %d electors"%count , end='')
+                print("Importing %d electors" % count, end='')
                 # revert the car to before line on console
                 print('\r', end='')
         print("")
@@ -176,3 +154,114 @@ class Command(BaseCommand):
         for dist in District.objects.all():
             update_district(dist)
         logger.info("Calculate stats to %d districts " % (District.objects.all().count()))
+
+class OrmLoader:
+    def get_canton(self, province, name, code):
+        """
+        Return a canton based on the name and code passed to function.
+
+        :param province: province name
+        :param name: canton name
+        :param code: district code
+        :return: Django Canton model
+        """
+        cantonid = code[:3]
+        if cantonid not in self.cantons:
+            province, created = Province.objects.get_or_create(
+                code=code[0],
+                name=province.strip()
+            )
+            canton, created = Canton.objects.get_or_create(
+                code=cantonid,
+                name=name.strip(),
+                province=province)
+            self.cantons[cantonid] = canton
+        return self.cantons[cantonid]
+
+    def import_districts(self, options):
+        """
+        Import all districts form diselect.txt file.
+
+        :param options: Argparse arguments (required diselect)
+        """
+        print("Importing Districts ")
+        distrits = []
+        for line in options['distelec'].readlines():
+            code, province, canton, distr = line.split(',')
+            objcanton = self.get_canton(province, canton, code)
+
+            distrits.append(District(
+                codelec=code,
+                name=distr.strip(),
+                canton=objcanton
+            ))
+        # District.objects.bulk_create(distrits)
+        print("Importing %d districts " % (len(distrits)))
+        logger.info("Importing %d districts " % (len(distrits)))
+
+class MongoLoader:
+
+    def import_districts(self,options):
+        """
+        Import all districts form diselect.txt file.
+
+        :param options: Argparse arguments (required diselect)
+        """
+
+        self.client = MongoClient(settings.MONGOSERVER,
+                                  username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
+        self.db = self.client['padron']
+
+
+        print("Importing Districts ")
+        dist_list = []
+        for line in options['distelec'].readlines():
+            code, province, canton, distr = line.split(',')
+            objcanton = self.get_canton(province, canton, code)
+            dist_doc = {
+                'codelec': code,
+                'name':distr,
+                'canton':objcanton
+
+            }
+            dist_list.append(dist_doc)
+
+        districts = self.db.districts
+        districts.insert_many(dist_list)
+
+        print("Importing %d districts using mongo" % (len(dist_list)))
+        logger.info("Importing %d districts using mongo" % (len(dist_list)))
+
+    def get_canton(self, province, name, code):
+        """
+        Return a canton based on the name and code passed to function.
+
+        :param province: province name
+        :param name: canton name
+        :param code: district code
+        :return: Django Canton model
+        """
+
+        self.client = MongoClient(settings.MONGOSERVER,
+                                  username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
+        self.db = self.client['padron']
+        cantonid = code[:3]
+        if cantonid not in self.cantons:
+            #province mongo document
+
+            prov_doc = {
+                'code': code[0],
+                'name': province.strip
+            }
+            provinces = self.db.provinces
+            provinces.insert_one(prov_doc)
+
+            #canton mongo document
+            cant_doc = {
+                'code': cantonid,
+                'name': name.strip
+            }
+            cantons = self.db.cantons
+            cantons.insert_one(cant_doc)
+            self.cantons[cantonid] = cant_doc['code']
+        return self.cantons[cantonid]

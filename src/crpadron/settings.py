@@ -89,6 +89,11 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+#Pymongo settings
+MONGOSERVER = 'mongodb://localhost:27017'
+MONGOUSERNAME = 'trainningadmin'
+MONGOPASSWORD = 'passadmin'
+
 
 
 # Password validation
