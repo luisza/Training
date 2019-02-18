@@ -15,6 +15,7 @@ class Province(models.Model):
     def __str__(self):
         return self.name
 
+
 class Canton(models.Model):
     code = models.SmallIntegerField(primary_key=True)
     name = models.CharField(max_length=30)
