@@ -11,9 +11,6 @@ class MongoDB:
                                   password=settings.MONGOPASSWORD)
         self.database = self.client.admin
 
-    def get_values_from_file(self, options):
-        print("get values from MongoDB")
-
     def clean_tables(self):
         """
         This function drop all the data in each table
@@ -33,20 +30,26 @@ class MongoDB:
         districts_list = []
         provinces_list = []
         cantons_list = []
-        actual_province_id = 0
-        actual_canton_id = 0
+
+        # Save the cantons and provinces ids
+        provinces_ids = []
+        cantons_ids = []
 
         for line in options['diselect'].readlines():
             code, province, canton, distr = line.split(',')
-            if (actual_province_id != code[0]):
-                province_dictionary = {'code': code[0], 'name': province, 'canton_id': code[:3]}
+
+            # It is to save only the provinces that have not been saved in the list of provinces.
+            if code[0] not in provinces_ids:
+                province_dictionary = {'code': code[0], 'name': province,
+                                       'stats_female': 0, 'stats_male': 0, 'stats_total': 0}
                 provinces_list.append(province_dictionary)
-                actual_province_id = code[0]
-            # code[:3] are the canton id, this is unique
-            elif (actual_canton_id != code[:3]):
-                canton_dictionary = {'code': code[:3], 'name': canton}
+                provinces_ids.append(code[0])
+
+            # It is to save only cantons that have not been saved in the list. code[:3] is the canton id and its unique
+            elif code[:3] not in cantons_ids:
+                canton_dictionary = {'code': code[:3], 'name': canton, 'stats_female': 0, 'stats_male': 0, 'stats_total': 0}
                 cantons_list.append(canton_dictionary)
-                actual_canton_id = code[:3]
+                cantons_ids.append(code[:3])
             district_dictionary = {'code': code, 'name': distr, 'stats_female': 0, 'stats_male': 0, 'stats_total': 0}
             districts_list.append(district_dictionary)
 
@@ -74,22 +77,31 @@ class MongoDB:
         # bulk insert in electors table.
         self.database.electors.insert_many(electors_list)
 
+    def update_stats(self, database, id_to_find):
+        """
+        :param database: The database to update the stats information
+        :param id_to_find: The id to find to search in electors count()
+        :return: All the stats updated to the database received in the parameter
+        """
+        list_database = database.find()
+        for item in list_database:
+            states_male = self.database.electors.find({id_to_find: item['code'], 'gender': "1"}).count()
+            states_female = self.database.electors.find({id_to_find: item['code'], 'gender': "2"}).count()
+            database.update_one(
+                {'code': item['code']},
+                {"$set": {'stats_female': states_female, 'stats_male': states_male,
+                          'stats_total': states_female + states_male}})
+
     def calculate_stats(self):
         """
         This function calculate all the stats for each district and save it
-        :return:
+        :return: All the stats updated in mongo
         """
-        # all existing districts
-        district_list = self.database.district.find()
+        # Call this function and you need to send the database name and the id to find
+        self.update_stats(self.database.province, 'id_province')
+        self.update_stats(self.database.canton, 'id_canton')
+        self.update_stats(self.database.district, 'id_district')
 
-        for district in district_list:
-            # keep the electors that correspond to each id_district
-            states_male = self.database.electors.find({'id_district': district['code'], 'gender': "1"}).count()
-            states_female = self.database.electors.find({'id_district': district['code'], 'gender': "2"}).count()
 
-            # update each district with electors count
-            self.database.district.update_one(
-                {'code': district['code']},
-                {"$set": {'stats_female': states_female, 'stats_male': states_male,
-                          'stats_total': states_female + states_male}})
+
 
