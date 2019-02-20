@@ -23,9 +23,6 @@ class MongoDB:
         self.database.canton.drop()
         self.database.district.drop()
         self.database.electors.drop()
-        self.database.cantons.drop()
-        self.database.districts.drop()
-        self.database.provinces.drop()
 
     def import_districts(self, options):
         """
