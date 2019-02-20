@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'a=fdm50m(6*7eg=w(it#vsv13l#xwt#l9$xz&9db3)@05@^#j3'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -74,7 +72,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'crpadron.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -83,16 +80,15 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'padron',
         'USER': 'solvo',
-        'PASSWORD': 'solvop4ss',
+        'PASSWORD': 'solvop4ss.',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
 #Pymongo settings
 MONGOSERVER = 'mongodb://localhost:27017'
-MONGOUSERNAME = 'trainingAdmin'
+MONGOUSERNAME = 'trainningAdmin'
 MONGOPASSWORD = 'passadmin'
-
 
 
 # Password validation
@@ -113,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -127,7 +122,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
@@ -135,7 +129,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-
 STATIC_URL = '/static/'
 INTERNAL_IPS = ['127.0.0.1']
 
+MONGOSERVER = 'mongodb://localhost:27017'
+MONGOUSERNAME = 'trainningadmin'
+MONGOPASSWORD = 'passadmin'
+MONGODATABASE = 'admin'
+
+ACTIVE_DATABASE = "MONGO"
