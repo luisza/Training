@@ -5,8 +5,11 @@ from pymongo import MongoClient
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.db.models import signals
-from padronelectoral.models import Elector, Province, Canton, District
-from crpadron import settings
+from padronelectoral.models import Elector,Province,Canton,District
+from django.conf import settings
+
+from padronelectoral.signals import update_district
+
 logger = logging.getLogger(__name__)
 
 
@@ -73,13 +76,13 @@ class Command(BaseCommand):
         end = time.time()
         print("Complete in ", end - start, " s")
 
-    def get_loader(self, options):
-        loader = None
+    def get_loader(self):
+
         if settings.MONGOSERVER != '':
-            loader = MongoLoader
+            loader = MongoLoader()
 
         else:
-            loader = OrmLoader
+            loader = OrmLoader()
 
         return loader
 
@@ -192,16 +195,17 @@ class OrmLoader:
 
 class MongoLoader:
 
+    def __init__(self):
+        client = MongoClient(settings.MONGOSERVER,
+                             username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
+        self.db = client['admin']
+
     def import_districts(self, options):
         """
         Import all districts form diselect.txt file.
 
         :param options: Argparse arguments (required diselect)
         """
-
-        client = MongoClient(settings.MONGOSERVER,
-                             username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
-        db = client['padron']
 
         print("Importing Districts ")
         dist_list = []
@@ -216,7 +220,7 @@ class MongoLoader:
             }
             dist_list.append(dist_doc)
 
-        districts = db.districts
+        districts = self.db.districts
         districts.insert_many(dist_list)
 
         print("Importing %d districts using mongo" % (len(dist_list)))
@@ -232,29 +236,28 @@ class MongoLoader:
         :return: Django Canton model
         """
 
-        client = MongoClient(settings.MONGOSERVER,
-                             username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
-        db = client['padron']
+        canton_list = {}
         cantonid = code[:3]
-        if cantonid not in self.cantons:
+        if cantonid not in canton_list:
             # province mongo document
 
             prov_doc = {
                 'code': code[0],
-                'name': province.strip
+                'name': province.strip()
             }
-            provinces = db.provinces
+            provinces = self.db.provinces
             provinces.insert_one(prov_doc)
 
             # canton mongo document
             cant_doc = {
                 'code': cantonid,
-                'name': name.strip
+                'name': name.strip()
             }
-            cantons = db.cantons
+            canton_list[cantonid]=name.strip()
+            cantons = self.db.cantons
             cantons.insert_one(cant_doc)
-            self.cantons[cantonid] = cant_doc['code']
-        return self.cantons[cantonid]
+
+        return canton_list[cantonid]
 
     def get_values_from_file(self, options):
         """
@@ -271,8 +274,7 @@ class MongoLoader:
             data = line.strip().split(',')
             fullname = "%s %s %s" % (data[5].strip(), data[6].strip(), data[7].strip())
             # idCard, gender, cad_date, board, fullName, codelec_id
-            values += "( %s, %s, %s, %s, \"%s\", %s ), " % (
-                data[0], data[2], data[3], data[4], fullname, data[1])
+            values = []
             Elector = {
                 'idCard': data[0],
                 'codelec': data[1],
@@ -284,32 +286,28 @@ class MongoLoader:
             values.append(Elector)
             if count == max_element:
                 count = 0
-                yield values[:-2]
+                yield values
                 values = ""
         if values != "":
-            yield values[:-2]
+            yield values
 
     def import_registry(self, options):
-
-        client = MongoClient(settings.MONGOSERVER,
-                             username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
-        db = client['padron']
-
-        elector_list = self.get_values_from_file(options)
-        electors = db.electors
-        electors.insert_many(elector_list)
+        electors = self.db.electors
+        for list_electors in self.get_values_from_file(options):
+            electors.insert_many(list_electors)
 
         print("")
-        logger.info("Importing %d electors " % (len(elector_list)))
+        #logger.info("Importing %d electors " % (len(elector_list)))
 
     def clean_tables(self):
         """
         Delete all data on database if exists.
         """
-        client = MongoClient(settings.MONGOSERVER,
-                             username=settings.MONGOUSERNAME, password=settings.MONGOPASSWORD)
-        db = client['padron']
-        db.dropDatabase()
+        list_to_drop = ['provinces', 'electors', 'cantons', 'districts']
+        for c in list_to_drop:
+            print(c)
+            self.db.drop_collection(c)
+
         print("Deleting all registry data")
 
     def calculate_stats(self):

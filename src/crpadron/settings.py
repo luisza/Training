@@ -90,7 +90,7 @@ DATABASES = {
 }
 #Pymongo settings
 MONGOSERVER = 'mongodb://localhost:27017'
-MONGOUSERNAME = 'trainningadmin'
+MONGOUSERNAME = 'trainingAdmin'
 MONGOPASSWORD = 'passadmin'
 
 
