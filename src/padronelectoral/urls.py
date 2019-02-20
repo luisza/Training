@@ -4,7 +4,7 @@ from . import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    path('', views.loadIndex, name='index'),
+    path('', views.load_index, name='index'),
     path('search', views.get_electors, name='get_electors'),
     path('stats/province/<int:pk>', views.get_province_data, name='get_province_data'),
     path('stats/canton/<int:pk>', views.get_canton_data, name='get_canton_data'),

@@ -32,21 +32,17 @@
             </tr>
         </thead>
         <tbody>
-           {% if message %}
-                <h2>{{message}}</h2>
-            {% endif %}
-
             {% if info %}
                 {% for elector in info %}
-                <tr>
-                    <td>{{ elector.idCard }}</td>
-                    <td> {{ elector.codelec.codelec}}</td>
-                    <td> {{ elector.fullName }} </td>
-                    <td>{{ elector.board }} </td>
-                    <td> <a href="{% url 'get_province_data' elector.codelec.canton.province.code %}" name="prov" > {{ elector.codelec.canton.province }} </a> </td>
-                    <td> <a href="{% url 'get_canton_data' elector.codelec.canton.code %}" name="cant"> {{ elector.codelec.canton}} </a></td>
-                    <td> <a href="{% url 'get_district_data' elector.codelec.codelec %}" name="dist"> {{ elector.codelec }} </a></td>
-                </tr>
+                    <tr>
+                        <td>{{elector.id_card }}</td>
+                        <td>{{elector.id_district}}</td>
+                        <td>{{elector.full_name}} </td>
+                        <td>{{elector.board}} </td>
+                        <td> <a href="{% url 'get_province_data' elector.id_province %}" name="prov" > {{ elector.province }} </a> </td>
+                        <td> <a href="{% url 'get_canton_data' elector.id_canton %}" name="cant"> {{ elector.canton}} </a></td>
+                        <td> <a href="{% url 'get_district_data' elector.id_district %}" name="dist"> {{ elector.district }} </a></td>
+                    </tr>
                 {% endfor %}
             {% else %}
             <tr><td>No results.</td></tr>

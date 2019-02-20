@@ -58,6 +58,7 @@ class MongoDB:
         self.database.canton.insert_many(cantons_list)
         self.database.district.insert_many(districts_list)
 
+
     def import_registry(self, options):
         """
         This function is to save all the electors information, in this case is important to
@@ -70,7 +71,7 @@ class MongoDB:
             # split all the information in each line, then is necessary to create an dictionary in a list
             idCard, codelec, gender, cad_date, board, name, first_name, last_name = line.split(',')
             full_name = "%s %s %s" % (name.strip(), first_name.strip(), last_name.strip())
-            electors_dictionary = {'idCard': idCard, 'id_district': codelec, 'id_province': codelec[0],
+            electors_dictionary = {'id_card': int(idCard), 'id_district': codelec, 'id_province': codelec[0],
                                    'id_canton': codelec[:3], 'gender': gender, 'cad_date': cad_date,
                                    'board': board, 'full_name': full_name}
             electors_list.append(electors_dictionary)
