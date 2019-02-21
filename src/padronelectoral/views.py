@@ -144,7 +144,7 @@ def get_province_data(request, pk):
                                               'totalE': province.stats_total,
                                               'location': province})
     elif actual_database() == "MONGO":
-        # in Mongo, the stats are load in the first commando. So, we can use the stats
+        # in Mongo, the stats are load in the first command. So, we can use the stats
         # in the current execution
         province = mongo_database().province.find_one({'code': str(pk)})
         return render(request, 'stats.html', {'totalM': province['stats_male'],
@@ -154,20 +154,28 @@ def get_province_data(request, pk):
 
 
 def get_canton_data(request, pk):
-    canton = get_object_or_404(Canton, pk=pk)
-    if canton.stats_total == -1:
-        print("--Calculating--")
-        elector_list_by_canton = Elector.objects.filter(codelec__canton=canton)
-        canton.stats_female = elector_list_by_canton.filter(gender=2).count()
-        canton.stats_male = elector_list_by_canton.filter(gender=1).count()
-        canton.stats_total = canton.stats_female + canton.stats_male
-        canton.save()
+    if actual_database() == "ORM":
+        canton = get_object_or_404(Canton, pk=pk)
+        if canton.stats_total == -1:
+            print("--Calculating--")
+            elector_list_by_canton = Elector.objects.filter(codelec__canton=canton)
+            canton.stats_female = elector_list_by_canton.filter(gender=2).count()
+            canton.stats_male = elector_list_by_canton.filter(gender=1).count()
+            canton.stats_total = canton.stats_female + canton.stats_male
+            canton.save()
 
-    return render(request, 'stats.html', {'totalM': canton.stats_male,
-                                          'totalF': canton.stats_female,
-                                          'totalE': canton.stats_total,
-                                          'location': canton})
-
+        return render(request, 'stats.html', {'totalM': canton.stats_male,
+                                              'totalF': canton.stats_female,
+                                              'totalE': canton.stats_total,
+                                              'location': canton})
+    elif actual_database() == "MONGO":
+        # in Mongo, the stats are load in the first command. So, we can use the stats
+        # in the current execution
+        province = mongo_database().canton.find_one({'code': str(pk)})
+        return render(request, 'stats.html', {'totalM': province['stats_male'],
+                                              'totalF': province['stats_female'],
+                                              'totalE': province['stats_total'],
+                                              'location': province['name']})
 
 def get_district_data(request, pk):
     """
@@ -176,19 +184,27 @@ def get_district_data(request, pk):
     :param pk: The district pk
     :return: The render with the stats.
     """
-    district = get_object_or_404(District, pk=pk)
-    if district.stats_total == None:
-        print("--Calculating--")
-        elector_list = Elector.objects.filter(codelec=pk)
-        district.stats_female = elector_list.filter(gender=2).count()
-        district.stats_male = elector_list.filter(gender=1).count()
-        district.stats_total = district.stats_female + district.stats_male
-        district.save()
-    return render(request, 'stats.html', {'totalM': district.stats_male,
-                                          'totalF': district.stats_female,
-                                          'totalE': district.stats_total,
-                                          'location': district})
-
+    if actual_database() == "ORM":
+        district = get_object_or_404(District, pk=pk)
+        if district.stats_total == None:
+            print("--Calculating--")
+            elector_list = Elector.objects.filter(codelec=pk)
+            district.stats_female = elector_list.filter(gender=2).count()
+            district.stats_male = elector_list.filter(gender=1).count()
+            district.stats_total = district.stats_female + district.stats_male
+            district.save()
+        return render(request, 'stats.html', {'totalM': district.stats_male,
+                                              'totalF': district.stats_female,
+                                              'totalE': district.stats_total,
+                                              'location': district})
+    elif actual_database() == "MONGO":
+        # in Mongo, the stats are load in the first commando. So, we can use the stats
+        # in the current execution
+        province = mongo_database().district.find_one({'code': str(pk)})
+        return render(request, 'stats.html', {'totalM': province['stats_male'],
+                                              'totalF': province['stats_female'],
+                                              'totalE': province['stats_total'],
+                                              'location': province['name']})
 
 @login_required
 def createElector(request):
