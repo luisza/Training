@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'padron',
         'USER': 'solvo',
-        'PASSWORD': 'solvop4ss.',
+        'PASSWORD': 'solvop4ss',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -137,4 +137,4 @@ MONGOUSERNAME = 'trainningadmin'
 MONGOPASSWORD = 'passadmin'
 MONGODATABASE = 'admin'
 
-ACTIVE_DATABASE = "MONGO"
+ACTIVE_DATABASE = "ORM"

@@ -1,7 +1,7 @@
 import logging
 from django.db import connection
 from padronelectoral.models import District, Province, Canton
-from padronelectoral.signals import update_district
+from padronelectoral.signals import update_district, update_canton, update_province
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,10 @@ class ORM:
         print("Deleting all registry data")
         with connection.cursor() as cursor:
             logger.debug("Execute 'TRUNCATE `padronelectoral_elector`' ")
-            # Delete in raw for optimization
+            #Delete in raw for optimization
             cursor.execute('TRUNCATE `padronelectoral_elector`')
 
-        # Using cascade aproach to delete other tables
+        #Using cascade aproach to delete other tables
         print(Province.objects.all().delete())
 
 
@@ -112,7 +112,15 @@ class ORM:
         """
         Calculate the stats base on imported data
         """
-        print("Doing stats")
+        print("Calculating Districts stats")
         for dist in District.objects.all():
             update_district(dist)
+
+        print("Calculating Canton stats")
+        for cant in Canton.objects.all():
+            update_canton(cant)
+
+        print("Calculating Province stats")
+        for prov in Province.objects.all():
+            update_province(prov)
         logger.info("Calculate stats to %d districts " % (District.objects.all().count()))

@@ -1,6 +1,6 @@
 # !/usr/bin/python3
 
-from pymongo import *
+from pymongo import MongoClient, UpdateOne
 from django.conf import settings
 
 
@@ -12,7 +12,31 @@ class MongoDB:
         self.database = self.client.admin
 
     def get_values_from_file(self, options):
-        print("get values from MongoDB")
+        max_element = options['truncate']
+        count = 0
+        values = []
+
+        for line in options['registry'].readlines():
+            count += 1
+            data = line.strip().split(',')
+            fullname = "%s %s %s" % (data[5].strip(), data[6].strip(), data[7].strip())
+            # idCard, gender, cad_date, board, fullName, codelec_id
+
+            Elector = {
+                'idCard': data[0],
+                'codelec': data[1],
+                'gender': data[2],
+                'cad_date': data[3],
+                'board': data[4],
+                'fullName': fullname
+            }
+            values.append(Elector)
+            if count == max_element:
+                count = 0
+                yield values
+                values = []
+        if values != []:
+            yield values
 
     def clean_tables(self):
         """
@@ -47,8 +71,7 @@ class MongoDB:
                 canton_dictionary = {'code': code[:3], 'province': code[0], 'name': canton}
                 cantons_list.append(canton_dictionary)
                 actual_canton_id = code[:3]
-            district_dictionary = {'code': code, 'canton': code[:3], 'name': distr, 'stats_female': 0, 'stats_male': 0,
-                                   'stats_total': 0}
+            district_dictionary = {'code': code, 'canton': code[:3], 'name': distr}
             districts_list.append(district_dictionary)
 
         # save the lists created in the appropriate tables.
@@ -63,81 +86,98 @@ class MongoDB:
         :param options: Options provide us the registry path
         :return: Saving the data in mongodb
         """
-        electors_list = []
-        for line in options['registry'].readlines():
-            # split all the information in each line, then is necessary to create an dictionary in a list
-            idCard, codelec, gender, cad_date, board, name, first_name, last_name = line.split(',')
-            full_name = "%s %s %s" % (name.strip(), first_name.strip(), last_name.strip())
-            electors_dictionary = {'idCard': idCard, 'id_district': codelec, 'id_province': codelec[0],
-                                   'id_canton': codelec[:3], 'gender': gender, 'cad_date': cad_date,
-                                   'board': board, 'full_name': full_name}
-            electors_list.append(electors_dictionary)
-        # bulk insert in electors table.
-        self.database.electors.insert_many(electors_list)
+
+        count = 0
+
+        electors = self.database.electors
+        for list_electors in self.get_values_from_file(options):
+            electors.insert_many(list_electors)
+            count += options['truncate']
+            print("Importing %d electors" % count, end='')
+            # revert the car to before line on console
+            print('\r', end='')
+        print("")
+
 
     def calculate_stats(self):
-        """
-        This function calculate all the stats for each district and save it
-        :return:
-        """
-        # all existing districts
-        district_list = self.database.district.find()
-        canton_list = self.database.canton.find()
-        province_list = self.database.province.find()
 
-        stats_males = self.database.electors.aggregate(
-            {'$match': {'gender': '1'}},
-            {'$group': {'id_district': "$id_district"}}
-        ).count()
+        dist_updates = []
+        canton_updates = []
+        prov_updates = []
 
-        stats_females = self.database.electors.aggregate(
-            {'$match': {'gender': '2'}},
-            {'$group': {'id_district': "$id_district"}}
-        ).count()
+        dist_stats = list(self.database.electors.aggregate([
+            {'$group': {
+                "_id": "$codelec",
+                "men_count": {
+                    "$sum": {"$cond": [{"$eq": ["$gender", '1']}, 1, 0]}
+                },
+                "women_count": {
+                    "$sum": {"$cond": [{"$eq": ["$gender", '2']}, 1, 0]}
+                },
+                "total_electors": {
+                    "$sum": 1
+                }
+            }}
+        ]))
 
-        for district in district_list:
-            # keep the electors that correspond to each id_district
-            total_males = stats_males[district['code']]
-            total_females = stats_females[district['code']]
-            total_electors = total_females + total_males
-            # update each district with electors count
-            self.database.district.update_one(
-                {'code': district['code']},
-                {"$set": {'stats_female': total_females, 'stats_male': total_males,
-                          'stats_total': total_electors}})
-        print('Calculating stats...Please Wait...')
+        for d in dist_stats:
+            dist_id = d.pop('_id')
+            dist_updates.append(UpdateOne(
+                {'code': dist_id},
+                {'$set': d}
+            ))
 
-        for canton in canton_list:
-            districts_canton = self.database.district.find({'canton': canton['code']})
-            total_males = 0
-            total_female = 0
+        # Bulk updates all stats from district, canton and province collections.
+        print('Calculating District stats')
+        self.database.district.bulk_write(dist_updates)
 
-            for dist in districts_canton:
-                total_males += dist['stats_male']
-                total_female += dist['stats_female']
+        canton_stats = list(self.database.district.aggregate([
+            {'$group': {
+                "_id": "$canton",
+                "men_count": {
+                    "$sum": '$men_count'
+                },
+                "women_count": {
+                    "$sum": '$women_count'
+                },
+                "total_electors": {
+                    "$sum": '$total_electors'
+                }
+            }}
+        ]))
 
-            total_electors = total_males + total_female
 
-            self.database.canton.update_one(
-                {'code': canton['code']},
-                {'$set': {'stats_male': total_males, 'stats_female': total_female, 'stats_total': total_electors}}
-            )
+        for c in canton_stats:
+            cant_id = c.pop('_id')
+            canton_updates.append(UpdateOne(
+                {'code': cant_id},
+                {'$set': c}
+            ))
 
-        print('Processing canton stats...Please Wait...')
+        print('Calculating Canton stats')
+        self.database.canton.bulk_write(canton_updates)
 
-        for prov in province_list:
-            province_cantons = self.database.canton.find({'province': prov['code']})
-            total_males = 0
-            total_female = 0
+        province_stats = list(self.database.canton.aggregate([
+            {'$group': {
+                "_id": "$province",
+                "men_count": {
+                    "$sum": '$men_count'
+                },
+                "women_count": {
+                    "$sum": '$women_count'
+                },
+                "total_electors": {
+                    "$sum": '$total_electors'
+                }
+            }}
+        ]))
 
-            for cant in province_cantons:
-                total_males += cant['stats_male']
-                total_female += cant['stats_female']
-                total_electors = total_males + total_female
+        for p in province_stats:
+            prov_id = p.pop('_id')
+            prov_updates.append(UpdateOne(
+                {'code': prov_id},
+                {'$set': p}
+            ))
 
-            self.database.province.update_one(
-                {'code': prov['code']},
-                {'$set': {'stats_male': total_males, 'stats_female': total_female, 'stats_total': total_electors}}
-            )
-
-            print('Calculating province stats...Please Wait...')
+        print('Calculating Province stats')
+        self.database.province.bulk_write(prov_updates)
