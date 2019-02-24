@@ -2,6 +2,7 @@
 
 from pymongo import *
 from django.conf import settings
+import threading
 
 
 class MongoDB:
@@ -47,7 +48,8 @@ class MongoDB:
 
             # It is to save only cantons that have not been saved in the list. code[:3] is the canton id and its unique
             elif code[:3] not in cantons_ids:
-                canton_dictionary = {'code': code[:3], 'name': canton, 'stats_female': 0, 'stats_male': 0, 'stats_total': 0}
+                canton_dictionary = {'code': code[:3], 'name': canton, 'stats_female': 0, 'stats_male': 0,
+                                     'stats_total': 0}
                 cantons_list.append(canton_dictionary)
                 cantons_ids.append(code[:3])
             district_dictionary = {'code': code, 'name': distr, 'stats_female': 0, 'stats_male': 0, 'stats_total': 0}
@@ -57,7 +59,6 @@ class MongoDB:
         self.database.province.insert_many(provinces_list)
         self.database.canton.insert_many(cantons_list)
         self.database.district.insert_many(districts_list)
-
 
     def import_registry(self, options):
         """
@@ -70,10 +71,10 @@ class MongoDB:
         for line in options['registry'].readlines():
             # split all the information in each line, then is necessary to create an dictionary in a list
             idCard, codelec, gender, cad_date, board, name, first_name, last_name = line.split(',')
-            full_name = "%s %s %s" % (name.strip(), first_name.strip(), last_name.strip())
-            electors_dictionary = {'id_card': int(idCard), 'id_district': codelec, 'id_province': codelec[0],
+            fullName = "%s %s %s" % (name.strip(), first_name.strip(), last_name.strip())
+            electors_dictionary = {'idCard': int(idCard), 'codelec': codelec, 'id_province': codelec[0],
                                    'id_canton': codelec[:3], 'gender': gender, 'cad_date': cad_date,
-                                   'board': board, 'full_name': full_name}
+                                   'board': board, 'fullName': fullName}
             electors_list.append(electors_dictionary)
         # bulk insert in electors table.
         self.database.electors.insert_many(electors_list)
@@ -99,10 +100,10 @@ class MongoDB:
         :return: All the stats updated in mongo
         """
         # Call this function and you need to send the database name and the id to find
-        self.update_stats(self.database.province, 'id_province')
-        self.update_stats(self.database.canton, 'id_canton')
-        self.update_stats(self.database.district, 'id_district')
 
-
-
-
+        thread1 = threading.Thread(target=self.update_stats(self.database.province, 'id_province'))
+        thread2 = threading.Thread(target=self.update_stats(self.database.canton, 'id_canton'))
+        thread3 = threading.Thread(target=self.update_stats(self.database.district, 'codelec'))
+        thread1.start()
+        thread2.start()
+        thread3.start()

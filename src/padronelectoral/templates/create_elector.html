@@ -9,7 +9,9 @@
  <table>
      {{form}}
  </table>
-
+    {% if error %}
+        <h3>{{error.error}}</h3>
+    {% endif %}
 
     <div>
         <button type="submit"> Save new Elector</button>
