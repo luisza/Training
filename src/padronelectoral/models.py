@@ -40,17 +40,18 @@ class District(models.Model):
     def __str__(self):
         return self.name
 
+
 class Elector(models.Model):
     GENDER = (
         (1, 'Male'),
         (2, "Female"))
     idCard = models.PositiveIntegerField(primary_key=True, validators=[MaxValueValidator(999999999)])
     codelec = models.ForeignKey(District, on_delete=models.CASCADE)
-    gender = models.SmallIntegerField(choices=GENDER, verbose_name=_("Genero"),
-                                      help_text=_("Hombre o mujer"))
+    gender = models.SmallIntegerField(choices=GENDER, verbose_name=_("Gender"),
+                                      help_text=_("Male or female"))
     cad_date = models.DateField()
     board = models.IntegerField(validators=[MaxValueValidator(999999)])
-    #not sure that this can be "" by default.
+    # not sure that this can be "" by default.
     fullName = models.CharField(max_length=100)
 
     def __str__(self):
@@ -63,3 +64,27 @@ class Elector(models.Model):
             return mark_safe('<img src="%s" />'%( static('/man-user.png')))
         else:
             return "Female dd"
+
+    @property
+    def id_province(self):
+        return self.codelec.canton.province.code
+
+    @property
+    def id_canton(self):
+        return self.codelec.canton.code
+
+    @property
+    def id_district(self):
+        return self.codelec.codelec
+
+    @property
+    def province(self):
+        return self.codelec.canton.province
+
+    @property
+    def canton(self):
+        return self.codelec.canton
+
+    @property
+    def district(self):
+        return self.codelec.name

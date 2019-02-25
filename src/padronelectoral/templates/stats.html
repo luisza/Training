@@ -3,10 +3,11 @@
 
 {% block content%}
 
-<h1 align="left" style="width:100%;">{{ location }}</h1>
+<input class="back_button" type=button value="Back" onClick="javascript:history.go(-1);">
+
+<h1 align="left" style="width:100%;"> {{ location }}</h1>
 
 <div align="center">
-
      {% csrf_token %}
     <h4>Total males: {{ totalM }}</h4>
     <h4>Total Females: {{ totalF }}</h4>
