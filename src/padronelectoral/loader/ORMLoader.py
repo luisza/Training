@@ -1,13 +1,13 @@
 import logging
 from django.db import connection
-from padronelectoral.models import District, Province, Canton
-from padronelectoral.signals import update_district, update_canton, update_province
+from django.db.models import Sum, F, Q
+
+from padronelectoral.models import District, Province, Canton, Elector
 
 logger = logging.getLogger(__name__)
 
 
 class ORM:
-
     cantons = {}
 
     def clean_tables(self):
@@ -17,12 +17,11 @@ class ORM:
         print("Deleting all registry data")
         with connection.cursor() as cursor:
             logger.debug("Execute 'TRUNCATE `padronelectoral_elector`' ")
-            #Delete in raw for optimization
+            # Delete in raw for optimization
             cursor.execute('TRUNCATE `padronelectoral_elector`')
 
-        #Using cascade aproach to delete other tables
+        # Using cascade aproach to delete other tables
         print(Province.objects.all().delete())
-
 
     def get_canton(self, province, name, code):
         """
@@ -46,7 +45,6 @@ class ORM:
             self.cantons[cantonid] = canton
         return self.cantons[cantonid]
 
-
     def import_districts(self, options):
         """
         Import all districts form diselect.txt file.
@@ -67,7 +65,6 @@ class ORM:
         District.objects.bulk_create(distrits)
         print("Importing %d districts " % (len(distrits)))
         logger.info("Importing %d districts " % (len(distrits)))
-
 
     def get_values_from_file(self, options):
         """
@@ -99,10 +96,10 @@ class ORM:
         count = 0
         with connection.cursor() as cursor:
             for values in self.get_values_from_file(options):
-                #print(sql%values)
-                cursor.execute(sql%(values,) )
+                # print(sql%values)
+                cursor.execute(sql % (values,))
                 count += options['truncate']
-                print("Importing %d electors"%count , end='')
+                print("Importing %d electors" % count, end='')
                 # revert the car to before line on console
                 print('\r', end='')
         print("")
@@ -112,15 +109,36 @@ class ORM:
         """
         Calculate the stats base on imported data
         """
-        print("Calculating Districts stats")
+        list_electors = Elector.objects.all()
+        dist_list = District.objects.all()
+        cant_list = Canton.objects.all()
+
+        print("Calculating district stats")
         for dist in District.objects.all():
-            update_district(dist)
+            dist.stats_male = list_electors.filter(codelec=dist.codelec, gender=1).count()
+            dist.stats_female = list_electors.filter(codelec=dist.codelec, gender=2).count()
+            dist.stats_total = dist.stats_male + dist.stats_female
+            dist.save()
 
-        print("Calculating Canton stats")
-        for cant in Canton.objects.all():
-            update_canton(cant)
+        print("Calculating canton stats")
+        for canton in Canton.objects.all():
+            d = dist_list.aggregate(men=Sum('stats_male', filter=Q(canton=canton.code)),
+                                    women=Sum('stats_female', filter=Q(canton=canton.code)),
+                                    elector_count=Sum('stats_total', filter=Q(canton=canton.code)))
 
-        print("Calculating Province stats")
+
+            canton.stats_male = d['men']
+            canton.stats_female = d['women']
+            canton.stats_total = d['elector_count']
+            canton.save()
+
+        print("Calculating province stats")
         for prov in Province.objects.all():
-            update_province(prov)
-        logger.info("Calculate stats to %d districts " % (District.objects.all().count()))
+            cn = cant_list.aggregate(men=Sum('stats_male', filter=Q(province=prov.code)),
+                                     women=Sum('stats_female', filter=Q(province=prov.code)),
+                                     elector_count=Sum('stats_total', filter=Q(province=prov.code)))
+
+            prov.stats_male = cn['men']
+            prov.stats_female = cn['women']
+            prov.stats_total = cn['elector_count']
+            prov.save()

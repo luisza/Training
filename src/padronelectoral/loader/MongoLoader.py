@@ -108,13 +108,13 @@ class MongoDB:
         dist_stats = list(self.database.electors.aggregate([
             {'$group': {
                 "_id": "$codelec",
-                "men_count": {
+                "stats_male": {
                     "$sum": {"$cond": [{"$eq": ["$gender", '1']}, 1, 0]}
                 },
-                "women_count": {
+                "stats_female": {
                     "$sum": {"$cond": [{"$eq": ["$gender", '2']}, 1, 0]}
                 },
-                "total_electors": {
+                "stats_total": {
                     "$sum": 1
                 }
             }}
@@ -134,14 +134,14 @@ class MongoDB:
         canton_stats = list(self.database.district.aggregate([
             {'$group': {
                 "_id": "$canton",
-                "men_count": {
-                    "$sum": '$men_count'
+                "stats_male": {
+                    "$sum": '$stats_male'
                 },
-                "women_count": {
-                    "$sum": '$women_count'
+                "stats_female": {
+                    "$sum": '$stats_female'
                 },
-                "total_electors": {
-                    "$sum": '$total_electors'
+                "stats_total": {
+                    "$sum": '$stats_total'
                 }
             }}
         ]))
@@ -160,14 +160,14 @@ class MongoDB:
         province_stats = list(self.database.canton.aggregate([
             {'$group': {
                 "_id": "$province",
-                "men_count": {
-                    "$sum": '$men_count'
+                "stats_male": {
+                    "$sum": '$stats_male'
                 },
-                "women_count": {
-                    "$sum": '$women_count'
+                "stats_female": {
+                    "$sum": '$stats_female'
                 },
-                "total_electors": {
-                    "$sum": '$total_electors'
+                "stats_total": {
+                    "$sum": '$stats_total'
                 }
             }}
         ]))
