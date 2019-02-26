@@ -10,21 +10,21 @@ from .models import Elector, District, Canton, Province
 def update_stats_handler(sender, instance, **kwargs):
     print("Update signals ", sender, instance)
 
-    if sender.gender == 1:
-        District.objects.filter(codelec=sender.codelec).update(stats_male=F('stats_male') + 1,
-                                                               stats_total=F('stats_total') + 1)
+    if instance.gender == 1:
+        District.objects.filter(codelec=instance.codelec.codelec).update(stats_male=F('stats_male') + 1,
+                                                          stats_total=F('stats_total') + 1)
 
-        Canton.objects.filter(code=sender.canton).update(stats_male=F('stats_male') + 1,
-                                                         stats_total=F('stats_total') + 1)
+        Canton.objects.filter(pk=instance.canton.code).update(stats_male=F('stats_male') + 1,
+                                                       stats_total=F('stats_total') + 1)
 
-        Province.objects.filter(code=sender.canton.province).update(stats_male=F('stats_male') + 1,
-                                                                    stats_total=F('stats_total') + 1)
+        Province.objects.filter(pk=instance.canton.province.code).update(stats_male=F('stats_male') + 1,
+                                                                  stats_total=F('stats_total') + 1)
     else:
-        District.objects.filter(codelec=sender.codelec).update(stats_female=F('stats_female') + 1,
-                                                               stats_total=F('stats_total') + 1)
+        District.objects.filter(pk=instance.codelec.codelec).update(stats_female=F('stats_female') + 1,
+                                                          stats_total=F('stats_total') + 1)
 
-        Canton.objects.filter(code=sender.canton).update(stats_female=F('stats_female') + 1,
-                                                         stats_total=F('stats_total') + 1)
+        Canton.objects.filter(pk=instance.canton.code).update(stats_female=F('stats_female') + 1,
+                                                       stats_total=F('stats_total') + 1)
 
-        Province.objects.filter(code=sender.canton.province).update(stats_female=F('stats_female') + 1,
-                                                                    stats_total=F('stats_total') + 1)
+        Province.objects.filter(pk=instance.canton.province.code).update(stats_female=F('stats_female') + 1,
+                                                                  stats_total=F('stats_total') + 1)
