@@ -12,6 +12,11 @@ class MongoDB:
         self.database = self.client.admin
 
     def get_values_from_file(self, options):
+        """
+        Reads registry text file to update the database
+        :param options:
+        :return:
+        """
         max_element = options['truncate']
         count = 0
         values = []
@@ -101,6 +106,10 @@ class MongoDB:
 
     def calculate_stats(self):
 
+        """
+        Counts all men and women on each district, canton and province and updates stats on each table.
+        :return:
+        """
         dist_updates = []
         canton_updates = []
         prov_updates = []

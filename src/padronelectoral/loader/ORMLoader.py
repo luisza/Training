@@ -1,6 +1,6 @@
 import logging
 from django.db import connection
-from django.db.models import Sum, F, Q
+from django.db.models import Sum, Q
 
 from padronelectoral.models import District, Province, Canton, Elector
 

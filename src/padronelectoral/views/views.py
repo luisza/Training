@@ -1,10 +1,6 @@
-from django.shortcuts import render, get_object_or_404, redirect
-
-from padronelectoral.forms import ElectorForm
-from django.contrib.auth.decorators import login_required
-from padronelectoral.models import Elector, Province, District, Canton
+from django.shortcuts import render
+from padronelectoral.models import Elector
 from django.http import JsonResponse
-from padronelectoral.Serializers import electors_serializer
 from rest_framework.views import APIView
 
 
